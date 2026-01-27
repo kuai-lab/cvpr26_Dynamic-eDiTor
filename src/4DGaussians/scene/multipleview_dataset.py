@@ -23,7 +23,7 @@ class multipleview_dataset(Dataset):
         self.FovY = focal2fov(self.focal[0], height)
         self.FovX = focal2fov(self.focal[0], width)
         self.transform = T.ToTensor()
-        self.image_paths, self.image_poses, self.image_times= self.load_images_path(cam_folder, cam_extrinsics,cam_intrinsics,split)
+        self.image_paths, self.image_poses, self.image_times, self.N_cams, self.N_time, self.cam_ids= self.load_images_path(cam_folder, cam_extrinsics,cam_intrinsics,split)
         if split=="test":
             self.video_cam_infos=self.get_video_cam_infos(cam_folder)
         
@@ -31,9 +31,13 @@ class multipleview_dataset(Dataset):
     def load_images_path(self, cam_folder, cam_extrinsics,cam_intrinsics,split):
         image_length = len(os.listdir(os.path.join(cam_folder,"cam01")))
         #len_cam=len(cam_extrinsics)
+        image_length=90
         image_paths=[]
         image_poses=[]
         image_times=[]
+        N_cams=0
+        N_time=0
+        cam_ids=[]
         for idx, key in enumerate(cam_extrinsics):
             extr = cam_extrinsics[key]
             R = np.transpose(qvec2rotmat(extr.qvec))
@@ -52,8 +56,10 @@ class multipleview_dataset(Dataset):
                 image_paths.append(image_path)
                 image_poses.append((R,T))
                 image_times.append(float(i/image_length))
-
-        return image_paths, image_poses, image_times
+                N_cams+=1
+                N_time+=1
+                cam_ids.append(number)
+        return image_paths, image_poses, image_times, N_cams, N_time, cam_ids
     
     def get_video_cam_infos(self,datadir):
         poses_arr = np.load(os.path.join(datadir, "poses_bounds_multipleview.npy"))
@@ -83,13 +89,14 @@ class multipleview_dataset(Dataset):
             FovY = self.FovY
             cameras.append(CameraInfo(uid=idx, R=R, T=T, FovY=FovY, FovX=FovX, image=image,
                                 image_path=image_path, image_name=image_name, width=image.shape[2], height=image.shape[1],
-                                time = time, mask=None))
+                                time = time))
         return cameras
     def __len__(self):
         return len(self.image_paths)
     def __getitem__(self, index):
         img = Image.open(self.image_paths[index])
         img = self.transform(img)
-        return img, self.image_poses[index], self.image_times[index]
+        mask = img.clone()
+        return img, self.image_poses[index], self.image_times[index], self.image_paths[index], self.cam_ids[index]
     def load_pose(self,index):
         return self.image_poses[index]
