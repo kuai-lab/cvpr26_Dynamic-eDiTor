@@ -31,7 +31,7 @@ class multipleview_dataset(Dataset):
     def load_images_path(self, cam_folder, cam_extrinsics,cam_intrinsics,split):
         image_length = len(os.listdir(os.path.join(cam_folder,"cam01")))
         #len_cam=len(cam_extrinsics)
-        image_length=90
+        # image_length=90
         image_paths=[]
         image_poses=[]
         image_times=[]
