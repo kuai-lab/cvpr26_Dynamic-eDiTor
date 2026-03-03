@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center"><strong>Dynamic‑eDiTor: Training‑Free Text‑Driven 4D Scene Editing with Multimodal Diffusion Transformer</strong></h1>
+  <h1 align="center"><strong>Dynamic‑eDiTor: Training‑Free Text‑Driven 4D Scene Editing with Multimodal Diffusion Transformer [CVPR 2026]</strong></h1>
 </p>
 
 
